@@ -38,19 +38,16 @@
 
 4. **Environment Variables**
     Create a `.development.env` file in the `backend` directory with the following variables:
-    ```sh
-    PORT: Port number for the backend server
-    MONGO_URI=MongoDB connection string
-    SECRET=your_jwt_secret
-    ```
+   - `PORT`: Port number for the backend server
+   - `MONGO_URI`: MongoDB connection string
+   - `SECRET`: JWT secret for authenticatio
+     
     Also create a `.env` file in the `backend` directory for the testing environment with the following variables:
-    ```sh
-    PORT=5000
-    MONGO_URI=MongoDB connection string for the test database
-    SECRET=your_jwt_secret
-    ```
+   - `PORT`: Port number for the backend server
+   - `MONGO_URI`: MongoDB connection string for the test database
+   - `SECRET`: JWT secret for authenticatio
 
-5. **Run the Application**
+6. **Run the Application**
     - Start the backend server
         ```sh
         cd backend
