@@ -21,7 +21,7 @@
 1. **Clone the repository**
     ```sh
     git clone https://github.com/Fahd011/Fahd-mern-10pshine.git
-    cd note-taker-app
+    cd Fahd-mern-10pshine
     ```
 
 2. **Backend Setup**
