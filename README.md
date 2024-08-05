@@ -1,40 +1,26 @@
 # Note-Taker App
 
-## Overview
-The Note-Taker App is a full-featured note-taking application built using the MERN stack (MongoDB, Express, React, Node.js). 
-The application allows users to sign up, log in, create, edit, delete, and view notes. Notes can be written in Markdown, allowing for rich text formatting. 
-The application also includes a user profile page where users can update their profile picture.
-
-## Features
-- User authentication (login and signup)
-- Dashboard displaying all user notes
-- Create, edit, and delete notes
-- Markdown support for writing notes
-- User profile management
-- Logging with Pino
-- Backend testing with Mocha/Chai
-- Frontend testing with Jest
-- Code quality analysis with SonarQube
-
-## Technologies Used
+## Tech Stack
 - **Frontend**: React, React Router, Bootstrap
 - **Backend**: Node.js, Express
 - **Database**: MongoDB
 - **Authentication**: JWT (JSON Web Tokens)
 - **Logging**: Pino
 - **Testing**: Mocha, Chai (backend); Jest (frontend)
-- **Code Quality**: SonarQube
+
+## Third-Party Services
+- Cloudinary for image uploads
+- SonarQube for code quality analysis
 
 ## Setup and Installation
 ### Prerequisites
 - Node.js (>= 14.x)
 - MongoDB
-- SonarQube
 
 ### Installation
 1. **Clone the repository**
     ```sh
-    git clone https://github.com/yourusername/note-taker-app.git
+    git clone https://github.com/Fahd011/Fahd-mern-10pshine.git
     cd note-taker-app
     ```
 
@@ -53,8 +39,14 @@ The application also includes a user profile page where users can update their p
 4. **Environment Variables**
     Create a `.development.env` file in the `backend` directory with the following variables:
     ```sh
+    PORT: Port number for the backend server
+    MONGO_URI=MongoDB connection string
+    SECRET=your_jwt_secret
+    ```
+    Also create a `.env` file in the `backend` directory for the testing environment with the following variables:
+    ```sh
     PORT=5000
-    MONGO_URI=mongodb://localhost:27017/note-taker
+    MONGO_URI=MongoDB connection string for the test database
     SECRET=your_jwt_secret
     ```
 
@@ -85,31 +77,8 @@ The application also includes a user profile page where users can update their p
     npm test
     ```
 
-## Project Structure
-### Backend
-- `server.js`: Entry point of the backend application
-- `routes/`: Contains all the routes for the application
-- `models/`: Contains the Mongoose models
-- `controllers/`: Contains the controller logic for the routes
-- `middlewares/`: Contains middleware functions
 
-### Frontend
-- `src/`: Contains all the React components and pages
-- `src/components/`: Reusable React components
-- `src/screens/`: Page components corresponding to different routes
-- `src/context/`: Context API for state management
-- `src/hooks/`: Custom hooks
-- `src/constants/`: Constants used across the application
-- `src/test/`: Jest tests for the frontend
+## Additional Features and Information
 
-## Logging
-The application uses Pino for logging. Logs are written to files based on the day, and the log configuration can be found in `backend/logger.js`.
-
-## Code Quality
-The project uses SonarQube for static code analysis. Ensure that SonarQube is running and configured properly to analyze the codebase.
-
-## Contribution
-Contributions are welcome! Please create a pull request or open an issue for any feature requests, bug reports, or general improvements.
-
-## License
-This project is licensed under the MIT License.
+- Markdown support for writing notes
+- User profile page
