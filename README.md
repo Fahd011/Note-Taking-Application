@@ -40,12 +40,12 @@
     Create a `.development.env` file in the `backend` directory with the following variables:
    - `PORT`: Port number for the backend server
    - `MONGO_URI`: MongoDB connection string
-   - `SECRET`: JWT secret for authenticatio
+   - `SECRET`: JWT secret for authentication
      
     Also create a `.env` file in the `backend` directory for the testing environment with the following variables:
    - `PORT`: Port number for the backend server
    - `MONGO_URI`: MongoDB connection string for the test database
-   - `SECRET`: JWT secret for authenticatio
+   - `SECRET`: JWT secret for authentication
 
 6. **Run the Application**
     - Start the backend server
