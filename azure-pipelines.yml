@@ -72,13 +72,13 @@ jobs:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)'
           ArtifactName: 'release'
           publishLocation: 'Container'
-      - task: AzureWebApp@1
-        inputs:
-          azureSubscription: 'note-taker-app'
-          appType: 'webApp'
-          appName: 'note-taker-app'
-          package: '$(Build.ArtifactStagingDirectory)/release'
-          deploymentMethod: 'auto'
+      # - task: AzureWebApp@1
+      #   inputs:
+      #     azureSubscription: 'note-taker-app'
+      #     appType: 'webApp'
+      #     appName: 'note-taker-app'
+      #     package: '$(Build.ArtifactStagingDirectory)/release'
+      #     deploymentMethod: 'auto'
 
 
   # # Job 2: Deploy (only if tests succeed)
