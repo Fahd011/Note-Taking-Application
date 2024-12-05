@@ -1,7 +1,3 @@
-# Node.js with React - Azure Pipeline
-# Pipeline for a Node.js project using a MERN stack with React
-# Includes steps for building, running tests, and analyzing code with SonarQube
-
 trigger:
   - develop
 
@@ -10,19 +6,19 @@ pool: TestAgent
 jobs:
   # Job 1: Test and Build
   - job: TestAndBuild
-    displayName: 'Run Tests and Build'
+    displayName: "Run Tests and Build"
     steps:
       # Step 1: Install Node.js
       - task: NodeTool@0
         inputs:
-          versionSpec: '20.x'
-        displayName: 'Install Node.js'
+          versionSpec: "20.x"
+        displayName: "Install Node.js"
 
       # Step 2: Download .env file from secure files
       - task: DownloadSecureFile@1
         inputs:
-          secureFile: '.env'
-      
+          secureFile: ".env"
+
       - task: DownloadSecureFile@1
         inputs:
           secureFile: ".development.env"
@@ -33,44 +29,44 @@ jobs:
           SourceFolder: $(Agent.TempDirectory)
           Contents: ".env"
           TargetFolder: $(Build.SourcesDirectory)\backend
-          
+
       - task: CopyFiles@2
         inputs:
           SourceFolder: $(Agent.TempDirectory)
-          Contents: '.development.env'
+          Contents: ".development.env"
           TargetFolder: $(Build.SourcesDirectory)\backend
 
       # Step 4: Run backend tests with Mocha and Chai
       - script: |
           cd backend
           npm install && npm test
-        displayName: 'Run Backend Tests with Mocha and Chai'
+        displayName: "Run Backend Tests with Mocha and Chai"
 
       # Step 5: Publish backend test results
       - task: PublishTestResults@2
         inputs:
-          testResultsFormat: 'JUnit'
-          testResultsFiles: '**/backend/test-*.xml'
+          testResultsFormat: "JUnit"
+          testResultsFiles: "**/backend/test-*.xml"
           failTaskOnFailedTests: true
 
       # Step 6: Run frontend tests with Jest
       - script: |
           cd frontend
           npm install && npm test
-        displayName: 'Run Frontend Tests with Jest'
+        displayName: "Run Frontend Tests with Jest"
 
       # Step 7: Publish frontend test results
       - task: PublishTestResults@2
         inputs:
-          testResultsFormat: 'JUnit'
-          testResultsFiles: '**/frontend/junit.xml'
+          testResultsFormat: "JUnit"
+          testResultsFiles: "**/frontend/junit.xml"
           failTaskOnFailedTests: true
-      
+
       # Step 8: create build
       - script: |
           cd frontend
           npm run build
-        displayName: 'Run Frontend Tests with Jest'
+        displayName: "Run Frontend Tests with Jest"
 
       # Step 8: Copy artifacts
       - task: CopyFiles@2
@@ -83,9 +79,9 @@ jobs:
       # Step 9: Publish build artifacts
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-          ArtifactName: 'release'
-          publishLocation: 'Container'
+          PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+          ArtifactName: "release"
+          publishLocation: "Container"
       # - task: AzureWebApp@1
       #   inputs:
       #     azureSubscription: 'note-taker-app'
@@ -93,7 +89,6 @@ jobs:
       #     appName: 'note-taker-app'
       #     package: '$(Build.ArtifactStagingDirectory)/release'
       #     deploymentMethod: 'auto'
-
 
   # # Job 2: Deploy (only if tests succeed)
   # - job: Deploy
