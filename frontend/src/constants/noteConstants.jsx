@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://note-taker-app.azurewebsites.net/api";
 
 export const NOTE_ROUTES = {
   GET_ALL_NOTES: `${BASE_URL}/notes/`,
