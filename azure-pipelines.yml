@@ -89,6 +89,6 @@ jobs:
       # Example deployment task for Azure Web App
       - task: AzureWebApp@1
         inputs:
-          azureSubscription: 'your-azure-service-connection'
-          appName: 'your-app-service-name'
+          azureSubscription: 'Azure subscription 1'
+          appName: 'note-taker-app'
           package: '$(Build.ArtifactStagingDirectory)/release'
