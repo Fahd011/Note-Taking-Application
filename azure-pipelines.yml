@@ -11,7 +11,7 @@ steps:
   # Step 1: Install Node.js
   - task: NodeTool@0
     inputs:
-      versionSpec: "20.x"
+      versionSpec: "20.x" 
     displayName: "Install Node.js"
 
   # Step 2: Download .env file from secure files
