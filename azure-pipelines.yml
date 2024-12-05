@@ -7,56 +7,82 @@ trigger:
 
 pool: TestAgent
 
-steps:
-  # Step 1: Install Node.js
-  - task: NodeTool@0
-    inputs:
-      versionSpec: "20.x"
-    displayName: "Install Node.js"
+jobs:
+  # Job 1: Test and Build
+  - job: TestAndBuild
+    displayName: 'Run Tests and Build'
+    steps:
+      # Step 1: Install Node.js
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '20.x'
+        displayName: 'Install Node.js'
 
-  # Step 2: Download .env file from secure files
-  - task: DownloadSecureFile@1
-    inputs:
-      secureFile: ".env"
+      # Step 2: Download .env file from secure files
+      - task: DownloadSecureFile@1
+        inputs:
+          secureFile: '.env'
+      
+      - task: DownloadSecureFile@1
+        inputs:
+          secureFile: ".development.env"
 
-  # Step 3: Copy .env file to the backend directory
-  - task: CopyFiles@2
-    inputs:
-      SourceFolder: $(Agent.TempDirectory)
-      Contents: ".env"
-      TargetFolder: $(Build.SourcesDirectory)\backend
+      # Step 3: Copy .env file to the backend directory
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: $(Agent.TempDirectory)
+          Contents: ".env"
+          TargetFolder: $(Build.SourcesDirectory)\backend
+          
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: $(Agent.TempDirectory)
+          Contents: '.development.env'
+          TargetFolder: $(Build.SourcesDirectory)\backend
 
-  # Step 4: Run backend tests with Mocha and Chai
-  - script: |
-      cd backend
-      dir
-      npm install && npm test
-    displayName: "Run backend tests with Mocha and Chai"
-    continueOnError: false
+      # Step 4: Run backend tests with Mocha and Chai
+      - script: |
+          cd backend
+          npm install && npm test
+        displayName: 'Run Backend Tests with Mocha and Chai'
 
-  # Step 5: Publish backend test results
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: "JUnit"
-      testResultsFiles: "**/backend/test-*.xml"
-      failTaskOnFailedTests: true
-      failTaskOnFailureToPublishResults: true
-      failTaskOnMissingResultsFile: true
-      testRunTitle: "Publish Backend Test Results"
+      # Step 5: Publish backend test results
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: '**/backend/test-*.xml'
+          failTaskOnFailedTests: true
 
-  # Step 6: Run frontend tests with Jest
-  - script: |
-      cd frontend
-      npm install && npm test
-    displayName: "Run frontend tests with Jest"
-    continueOnError: false
+      # Step 6: Run frontend tests with Jest
+      - script: |
+          cd frontend
+          npm install && npm test
+        displayName: 'Run Frontend Tests with Jest'
 
-  # Step 7: Publish frontend test results
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: "JUnit"
-      testResultsFiles: "**/frontend/junit.xml"
-      failTaskOnFailedTests: true
-      failTaskOnFailureToPublishResults: true
-      failTaskOnMissingResultsFile: true
-      testRunTitle: "Publish Frontend Test Results"
+      # Step 7: Publish frontend test results
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: '**/frontend/junit.xml'
+          failTaskOnFailedTests: true
+      
+      # Step 8: create build
+      - script: |
+          cd frontend
+          npm run build
+        displayName: 'Run Frontend Tests with Jest'
+
+      # Step 8: Copy artifacts
+      - task: CopyFiles@2
+        inputs:
+          Contents: |
+            frontend/dist/**
+            backend/**
+          TargetFolder: $(Build.ArtifactStagingDirectory)
+
+      # Step 9: Publish build artifacts
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'release'
+          publishLocation: 'Container'

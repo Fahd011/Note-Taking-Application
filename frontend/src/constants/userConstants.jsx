@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://note-taker-app.azurewebsites.net/api";
 
 export const USER_ROUTES = {
   SIGN_UP: `${BASE_URL}/users/signup`,
