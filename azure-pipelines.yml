@@ -4,7 +4,7 @@ trigger:
 pr:
   branches:
     include:
-      - main # Run the pipeline on PRs targeting main
+      - develop # Run the pipeline on PRs targeting main
 
 pool: TestAgent
 
@@ -89,6 +89,7 @@ jobs:
       # Example deployment task for Azure Web App
       - task: AzureWebApp@1
         inputs:
-          azureSubscription: 'Azure subscription 1'
+          azureSubscription: 'note-taker-app'
           appName: 'note-taker-app'
+          appType: 'webApp'
           package: '$(Build.ArtifactStagingDirectory)/release'
