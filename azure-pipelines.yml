@@ -11,7 +11,7 @@ steps:
   # Step 1: Install Node.js
   - task: NodeTool@0
     inputs:
-      versionSpec: "20.x"
+      versionSpec: "20.x" 
     displayName: "Install Node.js"
 
   # Step 2: Download .env file from secure files
@@ -26,13 +26,29 @@ steps:
       Contents: ".env"
       TargetFolder: $(Build.SourcesDirectory)\backend
 
+
+
+
+
   # Step 4: Run backend tests with Mocha and Chai
   - script: |
       cd backend
       dir
-      npm install && npm test
+      npm install 
     displayName: "Run backend tests with Mocha and Chai"
     continueOnError: false
+
+  - task: Npm@1
+    inputs:
+      command: 'custom'
+      workingDir: 'backend'
+      customCommand: 'start'
+
+  - task: Npm@1
+    inputs:
+      command: 'custom'
+      workingDir: 'backend'
+      customCommand: 'test'
 
   # Step 5: Publish backend test results
   - task: PublishTestResults@2
@@ -47,10 +63,21 @@ steps:
   # Step 6: Run frontend tests with Jest
   - script: |
       cd frontend
-      npm install && npm test
+      npm install 
     displayName: "Run frontend tests with Jest"
     continueOnError: false
 
+  - task: Npm@1
+    inputs:
+      command: 'custom'
+      workingDir: 'frontend'
+      customCommand: 'npm run build'
+  
+  - task: Npm@1
+    inputs:
+      command: 'custom'
+      workingDir: 'frontend'
+      customCommand: 'test'
   # Step 7: Publish frontend test results
   - task: PublishTestResults@2
     inputs:
@@ -60,3 +87,16 @@ steps:
       failTaskOnFailureToPublishResults: true
       failTaskOnMissingResultsFile: true
       testRunTitle: "Publish Frontend Test Results"
+
+  - task: CopyFiles@2
+    inputs:
+      Contents: |
+        frontend/dist/""
+        backend/""
+      TargetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'release'
+      publishLocation: 'Container'
