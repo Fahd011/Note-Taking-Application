@@ -1,11 +1,6 @@
 trigger:
   - develop
 
-pr:
-  branches:
-    include:
-      - develop # Run the pipeline on PRs targeting main
-
 pool: TestAgent
 
 jobs:
@@ -34,8 +29,7 @@ jobs:
       # Step 4: Run backend tests with Mocha and Chai
       - script: |
           cd backend
-          npm install 
-          npm test
+          npm install && npm test
         displayName: 'Run Backend Tests with Mocha and Chai'
 
       # Step 5: Publish backend test results
@@ -48,9 +42,7 @@ jobs:
       # Step 6: Run frontend tests with Jest
       - script: |
           cd frontend
-          npm install 
-          npm run build
-          npm test
+          npm install && npm test
         displayName: 'Run Frontend Tests with Jest'
 
       # Step 7: Publish frontend test results
@@ -59,6 +51,12 @@ jobs:
           testResultsFormat: 'JUnit'
           testResultsFiles: '**/frontend/junit.xml'
           failTaskOnFailedTests: true
+      
+      # Step 8: create build
+      - script: |
+          cd frontend
+          npm run build
+        displayName: 'Run Frontend Tests with Jest'
 
       # Step 8: Copy artifacts
       - task: CopyFiles@2
@@ -74,22 +72,30 @@ jobs:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)'
           ArtifactName: 'release'
           publishLocation: 'Container'
-
-  # Job 2: Deploy (only if tests succeed)
-  - job: Deploy
-    displayName: 'Deploy Application'
-    dependsOn: TestAndBuild
-    condition: succeeded() # Only run if the tests succeeded
-    steps:
-      - checkout: self
-
-      - script: echo "Deploying application..."
-        displayName: 'Deploying Application'
-
-      # Example deployment task for Azure Web App
       - task: AzureWebApp@1
         inputs:
           azureSubscription: 'note-taker-app'
-          appName: 'note-taker-app'
           appType: 'webApp'
+          appName: 'note-taker-app'
           package: '$(Build.ArtifactStagingDirectory)/release'
+          deploymentMethod: 'auto'
+
+
+  # # Job 2: Deploy (only if tests succeed)
+  # - job: Deploy
+  #   displayName: 'Deploy Application'
+  #   dependsOn: TestAndBuild
+  #   condition: succeeded() # Only run if the tests succeeded
+  #   steps:
+  #     - checkout: self
+
+  #     - script: echo "Deploying application..."
+  #       displayName: 'Deploying Application'
+
+  #     # Example deployment task for Azure Web App
+  #     - task: AzureWebApp@1
+  #       inputs:
+  #         azureSubscription: 'note-taker-app'
+  #         appName: 'note-taker-app'
+  #         appType: 'webApp'
+  #         package: '$(Build.ArtifactStagingDirectory)/release'
