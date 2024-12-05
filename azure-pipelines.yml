@@ -1,3 +1,7 @@
+# Node.js with React - Azure Pipeline
+# Pipeline for a Node.js project using a MERN stack with React
+# Includes steps for building, running tests, and analyzing code with SonarQube
+
 trigger:
   - develop
 
