@@ -9,7 +9,7 @@ on:
       - production
 
 jobs:
-  # Step 21 Build and Push Docker Image
+  # Step 1: Build and Push Docker Image
   build-and-push-docker:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
@@ -17,7 +17,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up Docker
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Log in to Docker Hub
@@ -26,32 +26,35 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Backend Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/mern-server:latest ./backend
           docker push ${{ secrets.DOCKER_USERNAME }}/mern-server:latest
 
-  # Step 3: Deploy to EC2 Instance
+      - name: Build and Push Frontend Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/mern-client:latest ./frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/mern-client:latest
+
+  # Step 2: Deploy to EC2 Instance
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build-and-push-docker
     steps:
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v0.1.3
+        uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Stop and remove any existing container
+            # Stop and remove existing containers
             docker-compose down || true
 
-            # Pull the latest Docker image
-            docker-compose pull
-
-            # Recreate .env file
-            echo "DB_URL=${{ secrets.DB_URL }}" > .env
+            # Pull the latest Docker images
+            docker pull ${{ secrets.DOCKER_USERNAME }}/mern-server:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/mern-client:latest
 
             # Start the app
             docker-compose up -d

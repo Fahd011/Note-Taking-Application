@@ -4,11 +4,23 @@ services:
   backend:
     image: anas1dev/mern-server:latest
     ports:
-      - '3000:3000'
+      - '5000:5000'
     env_file:
       - .env
+    networks:
+      - app-network
+    restart: unless-stopped
 
   client:
     image: anas1dev/mern-client:latest
     ports:
       - '80:80'
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
