@@ -57,5 +57,6 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/mern-client:latest
 
             cd Note-Taking-Application
+            sudo docker-compose down || true
             # Start the app
             sudo docker-compose up -d
