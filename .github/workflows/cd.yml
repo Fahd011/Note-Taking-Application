@@ -1,0 +1,62 @@
+name: Deploy MERN App
+
+on:
+  push:
+    branches:
+      - production
+  pull_request:
+    branches:
+      - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout Code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set Up AWS CLI
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # Step 3: Fetch Target Instance IP
+      - name: Get Target Instance (Green)
+        id: green_instance_ip
+        run: |
+          GREEN_INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Environment,Values=Green" "Name=instance-state-name,Values=running" \
+            --query "Reservations[0].Instances[0].InstanceId" --output text)
+          GREEN_INSTANCE_IP=$(aws ec2 describe-instances \
+            --instance-ids $GREEN_INSTANCE_ID \
+            --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
+          echo "GREEN_INSTANCE_IP=$GREEN_INSTANCE_IP" >> $GITHUB_ENV
+
+      # Step 4: Build and Deploy Backend
+      - name: Build and Deploy Backend
+        run: |
+          docker build -t mern-backend ./backend
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ec2-user@$GREEN_INSTANCE_IP "docker stop backend || true && docker rm backend || true"
+          docker save mern-backend | ssh -i ${{ secrets.SSH_KEY }} ec2-user@$GREEN_INSTANCE_IP "docker load && docker run -d --name backend -p 5000:5000 mern-backend"
+
+      # Step 5: Build and Deploy Frontend
+      - name: Build and Deploy Frontend
+        run: |
+          docker build -t mern-frontend ./frontend
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ec2-user@$GREEN_INSTANCE_IP "docker stop frontend || true && docker rm frontend || true"
+          docker save mern-frontend | ssh -i ${{ secrets.SSH_KEY }} ec2-user@$GREEN_INSTANCE_IP "docker load && docker run -d --name frontend -p 80:80 mern-frontend"
+
+      # Step 6: Update Load Balancer (Switch from Blue to Green)
+      - name: Switch Load Balancer
+        run: |
+          GREEN_INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Environment,Values=Green" "Name=instance-state-name,Values=running" \
+            --query "Reservations[0].Instances[0].InstanceId" --output text)
+          aws elb register-instances-with-load-balancer \
+            --load-balancer-name mern-load-balancer \
+            --instances $GREEN_INSTANCE_ID
