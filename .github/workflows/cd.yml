@@ -48,32 +48,35 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ssh_key.pem
           chmod 600 ssh_key.pem
 
-      # Step 5: Deploy to EC2 using Git
+      # Step 5: Deploy Code to EC2
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@$GREEN_INSTANCE_IP << EOF
-              # Ensure the necessary directory exists and pull the latest changes
-              if [ ! -d "/home/ec2-user/Note-Taking-Application" ]; then
-                  git clone https://github.com/Fahd011/Note-Taking-Application.git /home/ec2-user/Note-Taking-Application
-              fi
-              
-              cd /home/ec2-user/Note-Taking-Application
-              
-              # Reset and fetch the latest changes from the production branch
-              git reset --hard
-              git clean -fd
-              git fetch origin production
-              git checkout production
-              git pull origin production
-              
-              # Set environment variables
-              export MONGO_URI=${{ secrets.MONGO_URI }}
-              export JWT_SECRET=${{ secrets.JWT_SECRET }}
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@$GREEN_INSTANCE_IP << 'EOF'
+            # Ensure the necessary directory exists and pull the latest changes
+            if [ ! -d "/home/ec2-user" ]; then
+                git clone https://github.com/Fahd011/Note-Taking-Application.git /home/ec2-user/
+            fi
+            
+            cd /home/ec2-user/Note-Taking-Application
+            
+            # Reset and fetch the latest changes from the production branch
+            git reset --hard
+            git clean -fd
+            git fetch origin production
+            git checkout production
+            git pull origin production
+            
+            # Set environment variables
+            export MONGO_URI=${{ secrets.MONGO_URI }}
+            export JWT_SECRET=${{ secrets.JWT_SECRET }}
 
-              # Restart the application using Docker Compose
-              docker-compose down || true
-              docker-compose up -d --build
+            # Restart the application using Docker Compose
+            docker-compose down || true
+            docker-compose up -d --build
           EOF
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       # Step 6: Update Load Balancer (Switch from Blue to Green)
       - name: Switch Load Balancer
@@ -81,4 +84,6 @@ jobs:
           GREEN_INSTANCE_ID=$(aws ec2 describe-instances \
             --filters "Name=tag:Environment,Values=Green" "Name=instance-state-name,Values=running" \
             --query "Reservations[0].Instances[0].InstanceId" --output text)
-          aws elb register-instances-with-load-balancer
+          aws elb register-instances-with-load-balancer \
+            --load-balancer-name mern-load-balancer \
+            --instances $GREEN_INSTANCE_ID
