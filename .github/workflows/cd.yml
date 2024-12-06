@@ -50,11 +50,11 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             # Stop and remove existing containers
-            docker-compose down || true
+            sudo docker-compose down || true
 
             # Pull the latest Docker images
-            docker pull ${{ secrets.DOCKER_USERNAME }}/mern-server:latest
-            docker pull ${{ secrets.DOCKER_USERNAME }}/mern-client:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/mern-server:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/mern-client:latest
 
             # Start the app
-            docker-compose up -d
+            sudo docker-compose up -d
