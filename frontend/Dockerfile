@@ -1,5 +1,3 @@
-# Frontend Dockerfile
-
 # Stage 1: Build the React app
 FROM node:20 as build
 WORKDIR /usr/src/app
@@ -22,6 +20,9 @@ WORKDIR /usr/share/nginx/html
 # Remove the default Nginx static files and copy the React app's build
 RUN rm -rf ./*
 COPY --from=build /usr/src/app/dist .
+
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose the default Nginx port
 EXPOSE 80
