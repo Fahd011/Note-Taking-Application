@@ -1,21 +1,14 @@
 version: '3.8'
+
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: anas1dev/mern-server:latest
     ports:
-      - '5000:5000'
+      - '3000:3000'
     env_file:
       - .env
-    restart: unless-stopped
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+  client:
+    image: anas1dev/mern-client:latest
     ports:
       - '80:80'
-    depends_on:
-      - backend
-    restart: unless-stopped
