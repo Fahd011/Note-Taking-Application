@@ -35,8 +35,8 @@ resource "aws_security_group" "mern_sg" {
 
 # EC2 Instances (Blue and Green)
 resource "aws_instance" "blue" {
-  ami           = "ami-0c02fb55956c7d316" # Example Amazon Linux 2 AMI
-  instance_type = "t3.micro" # Changed from t2.micro to t3.micro
+  ami           = "ami-055e3d4f0bbeb5878" # Example Amazon Linux 2 AMI
+  instance_type = "t2.micro" # Changed from t2.micro to t3.micro
   key_name      = aws_key_pair.deploy_key.key_name
   security_groups = [aws_security_group.mern_sg.name]
   tags = {
@@ -47,8 +47,8 @@ resource "aws_instance" "blue" {
 }
 
 resource "aws_instance" "green" {
-  ami           = "ami-0c02fb55956c7d316" # Example Amazon Linux 2 AMI
-  instance_type = "t3.micro" # Changed from t2.micro to t3.micro
+  ami           = "ami-055e3d4f0bbeb5878" # Example Amazon Linux 2 AMI
+  instance_type = "t2.micro" # Changed from t2.micro to t3.micro
   key_name      = aws_key_pair.deploy_key.key_name
   security_groups = [aws_security_group.mern_sg.name]
   tags = {
