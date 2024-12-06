@@ -12,6 +12,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # Set environment variables for the job, these will be available for all steps
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      API_KEY: ${{ secrets.API_KEY }}
+
     steps:
       # Step 1: Checkout Code
       - name: Checkout Code
@@ -37,21 +43,23 @@ jobs:
             --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
           echo "GREEN_INSTANCE_IP=$GREEN_INSTANCE_IP" >> $GITHUB_ENV
 
-      # Step 4: Build and Deploy Backend
-      - name: Build and Deploy Backend
+      # Step 4: Deploy Backend and Frontend
+      - name: Deploy to EC2
         run: |
-          docker build -t mern-backend ./backend
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ec2-user@$GREEN_INSTANCE_IP "docker stop backend || true && docker rm backend || true"
-          docker save mern-backend | ssh -i ${{ secrets.SSH_KEY }} ec2-user@$GREEN_INSTANCE_IP "docker load && docker run -d --name backend -p 5000:5000 mern-backend"
+          scp -o StrictHostKeyChecking=no -r -i ${{ secrets.SSH_KEY }} \
+              ./backend ./frontend ./docker-compose.yml \
+              ec2-user@$GREEN_INSTANCE_IP:/home/ec2-user/
 
-      # Step 5: Build and Deploy Frontend
-      - name: Build and Deploy Frontend
-        run: |
-          docker build -t mern-frontend ./frontend
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ec2-user@$GREEN_INSTANCE_IP "docker stop frontend || true && docker rm frontend || true"
-          docker save mern-frontend | ssh -i ${{ secrets.SSH_KEY }} ec2-user@$GREEN_INSTANCE_IP "docker load && docker run -d --name frontend -p 80:80 mern-frontend"
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ec2-user@$GREEN_INSTANCE_IP << EOF
+              cd /home/ec2-user/
+              export MONGO_URI=${{ secrets.MONGO_URI }}
+              export JWT_SECRET=${{ secrets.JWT_SECRET }}
+              export API_KEY=${{ secrets.API_KEY }}
+              docker-compose down || true
+              docker-compose up -d --build
+          EOF
 
-      # Step 6: Update Load Balancer (Switch from Blue to Green)
+      # Step 5: Update Load Balancer (Switch from Blue to Green)
       - name: Switch Load Balancer
         run: |
           GREEN_INSTANCE_ID=$(aws ec2 describe-instances \
