@@ -8,7 +8,7 @@ const logger = require('./logger');
 
 const app = express();
 
-// Middleware
+
 const corsOptions = {
   origin: ['http://35.86.134.46', 'http://localhost:3000'], // Replace with your frontend domain or IP
   credentials: true, // allows cookies and authentication information
