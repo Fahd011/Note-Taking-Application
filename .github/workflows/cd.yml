@@ -1,0 +1,62 @@
+name: Deploy MERN App
+
+on:
+  push:
+    branches:
+      - production
+  pull_request:
+    branches:
+      - production
+
+jobs:
+  # Step 1: Build and Push Docker Image
+  build-and-push-docker:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Backend Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/mern-server:latest ./backend
+          docker push ${{ secrets.DOCKER_USERNAME }}/mern-server:latest
+
+      - name: Build and Push Frontend Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/mern-client:latest ./frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/mern-client:latest
+
+  # Step 2: Deploy to EC2 Instance
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-push-docker
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # Stop and remove existing containers
+            sudo docker-compose down || true
+
+            # Pull the latest Docker images
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/mern-server:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/mern-client:latest
+
+            cd Note-Taking-Application
+            sudo docker-compose down || true
+            # Start the app
+            sudo docker-compose up -d

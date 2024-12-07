@@ -29,3 +29,8 @@ backend/test-results.xml
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# terraform
+.terraform
+*.tfstate
+*.tfstate.backup
