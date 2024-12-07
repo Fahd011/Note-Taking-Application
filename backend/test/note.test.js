@@ -29,7 +29,7 @@ before((done) => {
     .post(SIGNUP_ROUTE)
     .send(user)
     .end((err, res) => {
-      res.should.have.status(201);
+      res.should.have.status(200);
       authToken = res.body.token;
       done();
     });
