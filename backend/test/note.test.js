@@ -50,7 +50,7 @@ describe("Testing All Note Related Routes", () => {
       .request(server)
       .get("/")
       .end((err, res) => {
-        res.should.have.status(201);
+        res.should.have.status(200);
         res.body.should.be.a("object");
         const actualVal = res.body.message;
         expect(actualVal).to.be.eql("API is running");
