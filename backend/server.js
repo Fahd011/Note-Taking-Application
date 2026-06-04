@@ -8,7 +8,7 @@ const logger = require("./logger");
 
 const app = express();
 
-// Middleware
+
 const corsOptions = {
   origin: "*",
   credentials: true, // access-control-allow-credentials:true
